@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:submission_belajar_fundamental_aplikasi_flutter/model/restaurantss.dart';
 import 'package:submission_belajar_fundamental_aplikasi_flutter/ui/home.dart';
 import 'package:submission_belajar_fundamental_aplikasi_flutter/ui/splash_screen.dart';
 
 import 'common/styles.dart';
+import 'model/restaurant.dart';
 import 'ui/detail_page.dart';
 
 void main() {

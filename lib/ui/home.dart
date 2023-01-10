@@ -1,23 +1,29 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:submission_belajar_fundamental_aplikasi_flutter/model/restaurantss.dart';
+import 'package:submission_belajar_fundamental_aplikasi_flutter/widget/card_restaurant.dart';
 import 'package:submission_belajar_fundamental_aplikasi_flutter/widget/platform_widget.dart';
 
-import 'detail_page.dart';
+import '../api/api_service.dart';
+import '../model/restaurant.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget  {
   static const routeName = '/home';
   const Home({super.key});
 
-  // This widget is the root of your application.
   @override
-  Widget build(BuildContext context) {
-    return const RestaurantList();
-  }
+  State<StatefulWidget> createState() =>
+    _Home();
 }
 
-class RestaurantList extends StatelessWidget {
-  const RestaurantList({super.key});
+class _Home extends State<Home> {
+
+  late Future<RestaurantResult> _restaurant;
+
+  @override
+  void initState() {
+    super.initState();
+    _restaurant = ApiService().list();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,51 +54,30 @@ class RestaurantList extends StatelessWidget {
   }
 
   Widget _buildList(BuildContext context) {
-    return FutureBuilder<String>(
-      future:
-          DefaultAssetBundle.of(context).loadString('assets/restaurants.json'),
+    return FutureBuilder(
+      future: _restaurant,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           // loading widget
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         } else {
           if (snapshot.hasData) {
-            // success widget
+            return ListView.builder(
+              shrinkWrap: true,
+              itemCount: snapshot.data?.restaurants?.length,
+              itemBuilder: (context, index) {
+                var restaurant = snapshot.data?.restaurants?[index];
+                return CardRestaurant(restaurant: restaurant!);
+              },
+            );
           } else if (snapshot.hasError) {
-            // error widget
             return Center(child: Text(snapshot.error.toString()),
             );
           } else {
-            // loading widget
-            return Center(child: CircularProgressIndicator());
+            return const Material(child: Text(''));
           }
         }
-        final List<Restaurant> restaurants = parseRestaurants(snapshot.data);
-        return ListView.builder(
-            itemCount: restaurants.length,
-            itemBuilder: (context, index) {
-              return _buildRestaurantItem(context, restaurants[index]);
-            });
       },
-    );
-  }
-
-  Widget _buildRestaurantItem(BuildContext context, Restaurant restaurant) {
-    return Material(
-      child: ListTile(
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        leading: Image.network(
-          restaurant.pictureId,
-          width: 100,
-        ),
-        title: Text(restaurant.name),
-        subtitle: Text(restaurant.city),
-        onTap: () {
-          Navigator.pushNamed(context, DetailPage.routeName,
-              arguments: restaurant);
-        },
-      ),
     );
   }
 }

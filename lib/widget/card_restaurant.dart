@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:submission_belajar_fundamental_aplikasi_flutter/model/restaurant.dart';
 
-import '../common/styles.dart';
 import '../ui/detail_page.dart';
 
 class CardRestaurant extends StatelessWidget {
@@ -13,7 +12,7 @@ class CardRestaurant extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: primaryColor,
+      color: Colors.white,
       child: ListTile(
         contentPadding:
         const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),

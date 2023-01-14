@@ -1,52 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:submission_belajar_fundamental_aplikasi_flutter/model/restaurant_detail.dart';
+import 'package:submission_belajar_fundamental_aplikasi_flutter/provider/detail_page_provider.dart';
 
-import '../api/api_service.dart';
 import '../model/restaurant.dart';
 import 'item_menu_tile.dart';
 
-class DetailPage extends StatefulWidget {
+class DetailPage extends StatelessWidget{
   static const routeName = '/restaurant_detail';
   final Restaurant restaurant;
 
-  const DetailPage({super.key, required this.restaurant});
+  DetailPage({super.key, required this.restaurant});
 
-  @override
-  State<StatefulWidget> createState() =>
-      _DetailPage();
-}
-
-class _DetailPage extends State<DetailPage> {
-  late Future<RestaurantDetailResult> _restaurant;
   static const String urlImage = "https://restaurant-api.dicoding.dev/images/medium/";
 
   @override
-  void initState() {
-    super.initState();
-    _restaurant = ApiService().detail(widget.restaurant.id!);
-  }
-
-  @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      var provider =
+      Provider.of<DetailPageProvider>(context, listen: false);
+      provider.fetchDetailRestaurant(restaurant.id!);
+    });
     return Scaffold(
         appBar: AppBar(
-          title: const Text("Restaurant Detail",
-              style: TextStyle(color: Color(0xffffffff))),
+          title: Text(restaurant.name!,
+              style: const TextStyle(color: Color(0xffffffff))),
         ),
-        body: FutureBuilder(
-          future: _restaurant,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
+        body: Consumer<DetailPageProvider>(
+          builder: (context, state, _) {
+            if (state.state == ResultState.loading) {
               return const Center(child: CircularProgressIndicator());
+            } else if (state.state == ResultState.hasData) {
+              return _buildDetail(context, state.result.restaurant!);
+            } else if (state.state == ResultState.noData) {
+              return Center(
+                child: Text(state.message),
+              );
+            } else if (state.state == ResultState.error) {
+              return Center(
+                child: Material(
+                  child: Text(state.message),
+                ),
+              );
             } else {
-              if (snapshot.hasData) {
-                return _buildDetail(context, snapshot.data!.restaurant!);
-              } else if (snapshot.hasError) {
-                return Center(child: Text(snapshot.error.toString()),
-                );
-              } else {
-                return const Material(child: Text(''));
-              }
+              return const Material(child: Text(''));
             }
           },
         )
